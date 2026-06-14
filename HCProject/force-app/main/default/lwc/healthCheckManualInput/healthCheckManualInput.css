@@ -1,0 +1,97 @@
+/* ── Overall banner ─────────────────────────────────────────────── */
+.overall-banner {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+.banner-green  { background: #c6efce; color: #375623; border-left: 4px solid #375623; }
+.banner-amber  { background: #ffeb9c; color: #9c5700; border-left: 4px solid #9c5700; }
+.banner-red    { background: #ffc7ce; color: #9c0006; border-left: 4px solid #9c0006; }
+
+/* ── Section headers ──────────────────────────────────────────────── */
+.section-title-auto {
+    background: #dae8f5;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #014486;
+    display: flex;
+    align-items: center;
+}
+.section-title-manual {
+    background: #fff3cd;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #7a4f00;
+    display: flex;
+    align-items: center;
+}
+.manual-section-header {
+    background: #e8f0fe;
+    padding: 0.3rem 0.6rem;
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #1a237e;
+    border-left: 3px solid #1a73e8;
+    margin-bottom: 4px;
+    border-radius: 0 4px 4px 0;
+}
+
+/* ── Table row colours ────────────────────────────────────────────── */
+.hc-table .row-green   td { background: #c6efce !important; }
+.hc-table .row-amber   td { background: #ffeb9c !important; }
+.hc-table .row-red     td { background: #ffc7ce !important; }
+.hc-table .row-pending td { background: #d9d9d9 !important; color: #666; font-style: italic; }
+
+/* ── Badge colours ────────────────────────────────────────────────── */
+.badge-amber   { background: #ffeb9c !important; color: #9c5700 !important; }
+.badge-red     { background: #ffc7ce !important; color: #9c0006 !important; }
+.badge-pending { background: #d9d9d9 !important; color: #555    !important; }
+
+/* ── Detail cell ──────────────────────────────────────────────────── */
+.detail-cell {
+    font-size: 0.78rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-width: 300px;
+}
+
+/* ── Manual card ──────────────────────────────────────────────────── */
+.manual-card {
+    border: 1px solid #d8dde6;
+    border-radius: 4px;
+    background: #fafafa;
+}
+.manual-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: block;
+    margin-top: 0.5rem;
+    color: #444;
+}
+.manual-card lightning-textarea,
+.manual-card lightning-input-rich-text,
+.manual-card lightning-input,
+.manual-card lightning-combobox {
+    display: block;
+    width: 100%;
+}
+
+/* keep the rich-text editor body/toolbar inside the column */
+.manual-card .slds-rich-text-editor,
+.manual-card .slds-rich-text-area__content {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Toast messages ───────────────────────────────────────────────── */
+.toast-success { background: #c6efce; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
+.toast-error   { background: #ffc7ce; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
+.toast-info    { background: #dae8f5; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }

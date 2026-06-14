@@ -1,0 +1,213 @@
+<template>
+    <lightning-card title="Sales Cloud Daily Health Check" icon-name="standard:dashboard">
+
+        <!-- ── Header bar ──────────────────────────────────────────────── -->
+        <div slot="actions">
+            <lightning-button-group>
+                <lightning-button
+                    label="Refresh Automated Checks"
+                    icon-name="utility:refresh"
+                    onclick={handleRefreshAutomated}
+                    disabled={isLoading}>
+                </lightning-button>
+                <lightning-button
+                    label="Save Manual Entries"
+                    icon-name="utility:save"
+                    variant="neutral"
+                    onclick={handleSave}
+                    disabled={isLoading}>
+                </lightning-button>
+                <lightning-button
+                    label="Send Health Check Email"
+                    icon-name="utility:email"
+                    variant="brand"
+                    onclick={handleSendEmail}
+                    disabled={isSendDisabled}>
+                </lightning-button>
+            </lightning-button-group>
+        </div>
+
+        <div class="slds-p-around_medium">
+
+            <!-- Loading spinner -->
+            <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+            </template>
+
+            <!-- ── Status banner ────────────────────────────────────────── -->
+            <template if:false={isLoading}>
+                <div class={overallBannerClass}>
+                    <span class="slds-icon_container slds-m-right_x-small">
+                        <lightning-icon
+                            icon-name={overallIcon}
+                            size="small"
+                            alternative-text="Status">
+                        </lightning-icon>
+                    </span>
+                    <strong>Overall Status: {overallStatusLabel}</strong>
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
+                    Check Date: {checkDateLabel}
+                    &nbsp;&nbsp;|&nbsp;&nbsp;
+                    <template if:true={emailSent}>
+                        <lightning-badge label="Email Sent" class="slds-badge_success"></lightning-badge>
+                    </template>
+                    <template if:false={emailSent}>
+                        <lightning-badge label="Email Not Sent Yet"></lightning-badge>
+                    </template>
+                    <template if:true={hasPending}>
+                        &nbsp;&nbsp;
+                        <lightning-badge
+                            label={pendingBadgeLabel}
+                            class="badge-pending">
+                        </lightning-badge>
+                    </template>
+                </div>
+
+                <!-- ── Toast messages ──────────────────────────────────── -->
+                <template if:true={toastMessage}>
+                    <div class={toastClass} role="alert">
+                        <span>{toastMessage}</span>
+                    </div>
+                </template>
+
+                <!-- ── AUTOMATED SECTIONS ──────────────────────────────── -->
+                <div class="slds-section slds-is-open slds-m-top_medium">
+                    <h3 class="slds-section__title section-title-auto">
+                        <lightning-icon icon-name="utility:bot" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Automated Checks ({automatedCount})
+                    </h3>
+                    <div class="slds-section__content">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped hc-table">
+                            <thead>
+                                <tr class="slds-line-height_reset">
+                                    <th scope="col" style="width:18%">Section</th>
+                                    <th scope="col" style="width:22%">Sub-Section</th>
+                                    <th scope="col" style="width:8%">Status</th>
+                                    <th scope="col" style="width:8%">Total</th>
+                                    <th scope="col" style="width:8%">Used</th>
+                                    <th scope="col" style="width:8%">Remaining</th>
+                                    <th scope="col">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template for:each={automatedLogs} for:item="log">
+                                    <tr key={log.Id} class={log.rowClass}>
+                                        <td>{log.KPMG_Section__c}</td>
+                                        <td>{log.KPMG_Sub_Section__c}</td>
+                                        <td class="slds-text-align_center">
+                                            <span class={log.badgeClass}>{log.KPMG_Status__c}</span>
+                                        </td>
+                                        <td class="slds-text-align_right">{log.totalFormatted}</td>
+                                        <td class="slds-text-align_right">{log.usedFormatted}</td>
+                                        <td class="slds-text-align_right">{log.remainingFormatted}</td>
+                                        <td class="detail-cell">{log.KPMG_Details__c}</td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ── MANUAL SECTIONS ──────────────────────────────────── -->
+                <div class="slds-section slds-is-open slds-m-top_medium">
+                    <h3 class="slds-section__title section-title-manual">
+                        <lightning-icon icon-name="utility:edit" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Manual Entries ({manualCount}) — Fill in and click "Send Health Check Email"
+                    </h3>
+                    <div class="slds-section__content">
+                        <template for:each={manualSectionGroups} for:item="group">
+                            <div key={group.sectionName} class="slds-m-bottom_small">
+                                <div class="manual-section-header">{group.sectionName}</div>
+                                <template for:each={group.items} for:item="log">
+                                    <div key={log.Id} class="slds-card slds-m-bottom_x-small manual-card">
+                                        <div class="slds-grid slds-gutters slds-wrap slds-p-around_x-small">
+                                        
+                                            <!-- Sub-section label -->
+                                            <div class="slds-col slds-size_2-of-12">
+                                                <span class="slds-text-title_caps manual-label">
+                                                    {log.KPMG_Sub_Section__c}
+                                                </span>
+                                            </div>
+
+                                            <!-- Status picklist -->
+                                            <div class="slds-col slds-size_2-of-12">
+                                                <lightning-combobox
+                                                    name={log.Id}
+                                                    label="Status"
+                                                    value={log.KPMG_Status__c}
+                                                    options={statusOptions}
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Status__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-combobox>
+                                            </div>
+
+                                            <!-- Details -->
+                                            <div class="slds-col slds-size_3-of-12">
+                                                <lightning-textarea
+                                                    label="Details / Observations"
+                                                    value={log.KPMG_Details__c}
+                                                    max-length="5000"
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Details__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-textarea>
+                                            </div>
+
+                                            <!-- Comments / Next Steps -->
+                                            <div class="slds-col slds-size_3-of-12">
+                                                <lightning-textarea
+                                                    label="Comments / Next Steps"
+                                                    value={log.KPMG_Comments__c}
+                                                    max-length="3000"
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Comments__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-textarea>
+                                            </div>
+
+                                            <!-- Screenshot -->
+                                            <div class="slds-col slds-size_3-of-12">
+                                                <lightning-input-rich-text
+                                                    label="Screenshot"
+                                                    label-visible
+                                                    value={log.KPMG_Image__c}
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Image__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-input-rich-text>
+                                            </div>
+
+                                            <!-- Jira / Ticket -->
+                                            <div class="slds-col slds-size_2-of-12">
+                                                <lightning-input
+                                                    type="text"
+                                                    label="Jira / Ticket Ref"
+                                                    value={log.KPMG_Jira_Reference__c}
+                                                    max-length="255"
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Jira_Reference__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-input>
+                                                <lightning-input
+                                                    type="checkbox"
+                                                    label="Recurring?"
+                                                    checked={log.KPMG_Is_Recurring__c}
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Is_Recurring__c"
+                                                    onchange={handleManualCheckboxChange}>
+                                                </lightning-input>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </template>
+        </div>
+    </lightning-card>
+</template>
