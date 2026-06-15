@@ -77,11 +77,12 @@ public with sharing class healthCheckManualInputController {
     @AuraEnabled
     public static void sendEmail(Id dailyCheckId,
                                   List<KPMG_Health_Check_Log__c> pendingLogs) {
+         System.debug('Saharsh Email' +dailyCheckId);
         // First save any unsaved manual entries
         if (pendingLogs != null && !pendingLogs.isEmpty()) {
             saveManualLogs(pendingLogs);
         }
-        //HealthCheck_EmailComposer.send(dailyCheckId);
+        healthCheckEmailComposer.send(dailyCheckId);
     }
 
     // ─── Re-run automated checks ──────────────────────────────────────────────

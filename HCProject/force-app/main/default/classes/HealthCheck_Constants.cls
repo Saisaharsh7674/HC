@@ -21,6 +21,8 @@ public with sharing class HealthCheck_Constants {
     public static final String SEC_SERVICE_ACCTS  = 'Service Accounts';
     public static final String SEC_MULESOFT       = 'MuleSoft Integration Errors';
     public static final String SEC_CVENT          = 'Cvent Errors';
+    public static final String SEC_HYPERFORCE     = 'Hyperforce';
+    public static final String SEC_CRMA           = 'CRMA';
 
     // ─── Status values ────────────────────────────────────────────────────────
     public static final String STATUS_GREEN   = 'Green';
@@ -41,24 +43,28 @@ public with sharing class HealthCheck_Constants {
         new ManualSectionDef(SEC_PROCESS,       'Sales Cloud Login',  8,  8),
         new ManualSectionDef(SEC_PROCESS,       'Flows',              9,  9),
         new ManualSectionDef(SEC_PROCESS,       'Proactive Monitoring Alerts', 10,  10),
-        new ManualSectionDef(SEC_MONITORING,    'SolarWind / P1s / P2s', 11, 11),
-        new ManualSectionDef(SEC_SC_HEALTH,     'SC Health Check Score', 12, 12),
-        new ManualSectionDef(SEC_OM_DASHBOARD,  'Daily Field Tracker (High Priority)', 13, 13),
-        new ManualSectionDef(SEC_OM_DASHBOARD,  'Daily Field Tracker (Low Priority)',  14, 14),
-        new ManualSectionDef(SEC_WORKBENCH,     'WorkBench Observations', 15, 15),
-        new ManualSectionDef(SEC_MULESOFT,      'MuleSoft Daily Digest',  16, 16),
-        new ManualSectionDef(SEC_SERVICE_ACCTS, 'Salesforce Trust', 17, 17)
+        new ManualSectionDef(SEC_ERROR_LOGS,    'System Error Logs',       11, 11),
+        new ManualSectionDef(SEC_HYPERFORCE,    'External IP Address',     12, 12),
+        new ManualSectionDef(SEC_SERVICE_ACCTS, 'Service Accounts Status', 13, 13),
+        new ManualSectionDef(SEC_MONITORING,    'SolarWind / P1s / P2s',   14, 14),
+        new ManualSectionDef(SEC_SC_HEALTH,     'SC Health Check Score',   18, 18),
+        new ManualSectionDef(SEC_AUP,           'Login/User Provisioning', 19, 19),
+        new ManualSectionDef(SEC_OM_DASHBOARD,  'Daily Field Tracker (High Priority)', 20, 20),
+        new ManualSectionDef(SEC_OM_DASHBOARD,  'Daily Field Tracker (Low Priority)',  21, 21),
+        new ManualSectionDef(SEC_WORKBENCH,     'WorkBench Observations',  23, 23),
+        new ManualSectionDef(SEC_CRMA,          'CRMA Status',             24, 24),
+        new ManualSectionDef(SEC_TRUST,         'Salesforce Trust',        25, 25)
     };
 
     // ─── Automated section display orders ────────────────────────────────────
-    public static final Integer ORD_USER_LIC     = 20;
-    public static final Integer ORD_PSL          = 21;
-    public static final Integer ORD_PLATFORM_EVT = 22;
-    public static final Integer ORD_SCHED_JOBS   = 23;
-    public static final Integer ORD_ERROR_LOGS   = 24;
-    public static final Integer ORD_CVENT        = 25;
-    public static final Integer ORD_AUP          = 26;
-    public static final Integer ORD_TRUST        = 27;
+    //  REFERENCE ONLY — these constants are not read by the engine. The live order
+    //  of each automated check is the KPMG_Display_Order__c on its
+    //  KPMG_Daily_Health_Check__c config record; set the SAME numbers there.
+    public static final Integer ORD_USER_LIC     = 15;  // Salesforce Licenses
+    public static final Integer ORD_PSL          = 16;  // Permission Set Licenses
+    public static final Integer ORD_SCHED_JOBS   = 17;  // Batch/Scheduled Jobs
+    public static final Integer ORD_PLATFORM_EVT = 22;  // Platform Events
+    public static final Integer ORD_CVENT        = 26;  // Cvent Errors (not in the standard list)
 
     // ─── Helper inner class ───────────────────────────────────────────────────
     public class ManualSectionDef {

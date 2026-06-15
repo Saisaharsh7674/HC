@@ -10,7 +10,15 @@
         <members>healthCheckMasterJob</members>
         <members>healthCheckQueryService</members>
         <members>HealthCheck_Constants</members>
+        <members>healthCheckEmailComposer</members>
+        <members>healthCheckEmailController</members>
+        <members>HealthCheck_Constants</members>
+        <members>healthCheckHandler</members>
         <name>ApexClass</name>
+    </types>
+    <types>
+        <members>healthCheckEmailBody</members>
+        <name>ApexComponent</name>
     </types>
     
     <version>66.0</version>
