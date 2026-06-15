@@ -11,11 +11,12 @@
         <apex:repeat value="{!sections}" var="sec">
             <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:12px;">
                 <tr style="background:#4472C4; color:#ffffff;">
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:22%;"><apex:outputText value="{!sec.name}"/></td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:9%; text-align:center;">Status</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:33%;">Comments</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:27%;">Next Steps</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:9%; text-align:center;">Recurring</td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:18%;"><apex:outputText value="{!sec.name}"/></td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:8%; text-align:center;">Status</td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:28%;">Comments</td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:22%;">Next Steps</td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:16%; text-align:center;">Screenshot</td>
+                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:8%; text-align:center;">Recurring</td>
                 </tr>
                 <apex:repeat value="{!sec.rows}" var="row">
                     <tr>
@@ -23,9 +24,9 @@
                         <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center; font-weight:bold; background:{!row.statusColor}; color:{!row.statusTextColor};"><apex:outputText value="{!row.status}"/></td>
                         <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top;">
                             <apex:outputText escape="false" value="{!row.comments}"/>
-                            <apex:outputText escape="false" value="{!row.imageHtml}"/>
                         </td>
                         <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top;"><apex:outputText escape="false" value="{!row.nextSteps}"/></td>
+                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center;"><apex:outputText escape="false" value="{!row.imageHtml}"/></td>
                         <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center;"><apex:outputText value="{!row.recurring}"/></td>
                     </tr>
                 </apex:repeat>
