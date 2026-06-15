@@ -1,6 +1,6 @@
 <template>
     <lightning-card title="Sales Cloud Daily Health Check" icon-name="standard:dashboard">
-
+ 
         <!-- ── Header bar ──────────────────────────────────────────────── -->
         <div slot="actions">
             <lightning-button-group>
@@ -26,14 +26,14 @@
                 </lightning-button>
             </lightning-button-group>
         </div>
-
+ 
         <div class="slds-p-around_medium">
-
+ 
             <!-- Loading spinner -->
             <template if:true={isLoading}>
                 <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
             </template>
-
+ 
             <!-- ── Status banner ────────────────────────────────────────── -->
             <template if:false={isLoading}>
                 <div class={overallBannerClass}>
@@ -62,29 +62,30 @@
                         </lightning-badge>
                     </template>
                 </div>
-
+ 
                 <!-- ── Toast messages ──────────────────────────────────── -->
                 <template if:true={toastMessage}>
                     <div class={toastClass} role="alert">
                         <span>{toastMessage}</span>
                     </div>
                 </template>
-
+ 
                 <!-- ── AUTOMATED SECTIONS ──────────────────────────────── -->
                 <div class="slds-section slds-is-open slds-m-top_medium">
                     <h3 class="slds-section__title section-title-auto">
                         <lightning-icon icon-name="utility:bot" size="x-small" class="slds-m-right_x-small"></lightning-icon>
-                        Automated Checks ({automatedCount})
+                        Automated Checks ({automatedCount}) — Status &amp; Details are editable
                     </h3>
                     <div class="slds-section__content">
+                        <div class="slds-scrollable_x">
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped hc-table">
                             <thead>
                                 <tr class="slds-line-height_reset">
-                                    <th scope="col" style="width:18%">Section</th>
-                                    <th scope="col" style="width:22%">Sub-Section</th>
-                                    <th scope="col" style="width:8%">Status</th>
-                                    <th scope="col" style="width:8%">Total</th>
-                                    <th scope="col" style="width:8%">Used</th>
+                                    <th scope="col" style="width:15%">Section</th>
+                                    <th scope="col" style="width:18%">Sub-Section</th>
+                                    <th scope="col" style="width:12%">Status</th>
+                                    <th scope="col" style="width:7%">Total</th>
+                                    <th scope="col" style="width:7%">Used</th>
                                     <th scope="col" style="width:8%">Remaining</th>
                                     <th scope="col">Details</th>
                                 </tr>
@@ -94,20 +95,39 @@
                                     <tr key={log.Id} class={log.rowClass}>
                                         <td>{log.KPMG_Section__c}</td>
                                         <td>{log.KPMG_Sub_Section__c}</td>
-                                        <td class="slds-text-align_center">
-                                            <span class={log.badgeClass}>{log.KPMG_Status__c}</span>
+                                        <td class="auto-edit-cell">
+                                            <lightning-combobox
+                                                variant="label-hidden"
+                                                label="Status"
+                                                value={log.KPMG_Status__c}
+                                                options={statusOptions}
+                                                data-id={log.Id}
+                                                data-field="KPMG_Status__c"
+                                                onchange={handleAutomatedFieldChange}>
+                                            </lightning-combobox>
                                         </td>
                                         <td class="slds-text-align_right">{log.totalFormatted}</td>
                                         <td class="slds-text-align_right">{log.usedFormatted}</td>
                                         <td class="slds-text-align_right">{log.remainingFormatted}</td>
-                                        <td class="detail-cell">{log.KPMG_Details__c}</td>
+                                        <td class="auto-edit-cell">
+                                            <lightning-textarea
+                                                variant="label-hidden"
+                                                label="Details"
+                                                value={log.KPMG_Details__c}
+                                                max-length="5000"
+                                                data-id={log.Id}
+                                                data-field="KPMG_Details__c"
+                                                onchange={handleAutomatedFieldChange}>
+                                            </lightning-textarea>
+                                        </td>
                                     </tr>
                                 </template>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
-
+ 
                 <!-- ── MANUAL SECTIONS ──────────────────────────────────── -->
                 <div class="slds-section slds-is-open slds-m-top_medium">
                     <h3 class="slds-section__title section-title-manual">
@@ -120,17 +140,15 @@
                                 <div class="manual-section-header">{group.sectionName}</div>
                                 <template for:each={group.items} for:item="log">
                                     <div key={log.Id} class="slds-card slds-m-bottom_x-small manual-card">
-                                        <div class="slds-grid slds-gutters slds-wrap slds-p-around_x-small">
-                                        
-                                            <!-- Sub-section label -->
-                                            <div class="slds-col slds-size_2-of-12">
-                                                <span class="slds-text-title_caps manual-label">
-                                                    {log.KPMG_Sub_Section__c}
-                                                </span>
-                                            </div>
-
+ 
+                                        <!-- Item title (full width) -->
+                                        <div class="manual-item-title">{log.KPMG_Sub_Section__c}</div>
+ 
+                                        <!-- Field row: columns sum to 12 -->
+                                        <div class="slds-grid slds-gutters_small slds-wrap slds-grid_vertical-align-start">
+ 
                                             <!-- Status picklist -->
-                                            <div class="slds-col slds-size_2-of-12">
+                                            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12">
                                                 <lightning-combobox
                                                     name={log.Id}
                                                     label="Status"
@@ -141,9 +159,9 @@
                                                     onchange={handleManualFieldChange}>
                                                 </lightning-combobox>
                                             </div>
-
+ 
                                             <!-- Details -->
-                                            <div class="slds-col slds-size_3-of-12">
+                                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
                                                 <lightning-textarea
                                                     label="Details / Observations"
                                                     value={log.KPMG_Details__c}
@@ -153,9 +171,9 @@
                                                     onchange={handleManualFieldChange}>
                                                 </lightning-textarea>
                                             </div>
-
+ 
                                             <!-- Comments / Next Steps -->
-                                            <div class="slds-col slds-size_3-of-12">
+                                            <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
                                                 <lightning-textarea
                                                     label="Comments / Next Steps"
                                                     value={log.KPMG_Comments__c}
@@ -165,21 +183,9 @@
                                                     onchange={handleManualFieldChange}>
                                                 </lightning-textarea>
                                             </div>
-
-                                            <!-- Screenshot -->
-                                            <div class="slds-col slds-size_3-of-12">
-                                                <lightning-input-rich-text
-                                                    label="Screenshot"
-                                                    label-visible
-                                                    value={log.KPMG_Image__c}
-                                                    data-id={log.Id}
-                                                    data-field="KPMG_Image__c"
-                                                    onchange={handleManualFieldChange}>
-                                                </lightning-input-rich-text>
-                                            </div>
-
-                                            <!-- Jira / Ticket -->
-                                            <div class="slds-col slds-size_2-of-12">
+ 
+                                            <!-- Jira / Ticket + Recurring -->
+                                            <div class="slds-col slds-size_1-of-1 slds-medium-size_2-of-12">
                                                 <lightning-input
                                                     type="text"
                                                     label="Jira / Ticket Ref"
@@ -192,21 +198,37 @@
                                                 <lightning-input
                                                     type="checkbox"
                                                     label="Recurring?"
+                                                    class="slds-m-top_x-small"
                                                     checked={log.KPMG_Is_Recurring__c}
                                                     data-id={log.Id}
                                                     data-field="KPMG_Is_Recurring__c"
                                                     onchange={handleManualCheckboxChange}>
                                                 </lightning-input>
                                             </div>
-
+ 
                                         </div>
+ 
+                                        <!-- Screenshot (full width row) -->
+                                        <div class="slds-grid slds-wrap slds-m-top_x-small">
+                                            <div class="slds-col slds-size_1-of-1">
+                                                <lightning-input-rich-text
+                                                    label="Screenshot"
+                                                    label-visible
+                                                    value={log.KPMG_Image__c}
+                                                    data-id={log.Id}
+                                                    data-field="KPMG_Image__c"
+                                                    onchange={handleManualFieldChange}>
+                                                </lightning-input-rich-text>
+                                            </div>
+                                        </div>
+ 
                                     </div>
                                 </template>
                             </div>
                         </template>
                     </div>
                 </div>
-
+ 
             </template>
         </div>
     </lightning-card>

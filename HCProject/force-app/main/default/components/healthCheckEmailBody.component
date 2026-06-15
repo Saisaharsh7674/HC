@@ -1,69 +1,115 @@
 <apex:component controller="healthCheckEmailController" access="global">
     <apex:attribute name="dailyCheck" type="Id" assignTo="{!dailyCheckId}"
                     description="The KPMG_Daily_Health_Check__c master record Id for the day."/>
-
-    <div style="font-family:Arial,Helvetica,sans-serif; color:#1f2937; font-size:12px;">
-
-        <div style="background:#00B0F0; color:#ffffff; font-size:15px; font-weight:bold; padding:10px 12px;">
-            Sales Cloud Daily Health Check Summary (Date: {!checkDate})
-        </div>
-
+ 
+    <!--
+        Email body for the Sales Cloud Daily Health Check.
+        All styling is INLINE (email clients strip <style> blocks / classes).
+        Palette: header #1c5fbf, section text #14457f, table head #e4eefb,
+                 borders #d8e2f0, status pills via {!row.badgeStyle}.
+    -->
+    <div style="font-family:Arial,Helvetica,sans-serif; color:#1f2937; font-size:12px; background:#ffffff; padding:4px;">
+ 
+        <!-- ── Header bar ─────────────────────────────────────────────── -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="border-collapse:collapse; background:#1c5fbf; border-radius:8px;">
+            <tr>
+                <td style="padding:14px 18px; color:#ffffff; font-size:20px; font-weight:bold; vertical-align:middle;">
+                    <span style="font-size:20px;">&#9729;&#65039;</span>&nbsp; Sales Cloud Daily Health Check Summary
+                </td>
+                <td style="padding:14px 18px; text-align:right; vertical-align:middle; white-space:nowrap;">
+                    <span style="display:inline-block; background:#ffffff; color:#1c5fbf; font-weight:bold;
+                                 font-size:13px; padding:6px 14px; border-radius:18px;">
+                        &#128197;&nbsp; Date: {!checkDate}
+                    </span>
+                </td>
+            </tr>
+        </table>
+ 
+        <!-- ── Section bands ──────────────────────────────────────────── -->
         <apex:repeat value="{!sections}" var="sec">
-            <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:12px;">
-                <tr style="background:#4472C4; color:#ffffff;">
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:18%;"><apex:outputText value="{!sec.name}"/></td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:8%; text-align:center;">Status</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:28%;">Comments</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:22%;">Next Steps</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:16%; text-align:center;">Screenshot</td>
-                    <td style="padding:6px 8px; border:1px solid #cfd6e4; width:8%; text-align:center;">Recurring</td>
+ 
+            <div style="margin:18px 0 8px; padding-left:10px; border-left:4px solid #1c5fbf;
+                        color:#14457f; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px;">
+                <apex:outputText value="{!sec.name}"/>
+            </div>
+ 
+            <table width="100%" cellpadding="0" cellspacing="0"
+                   style="border-collapse:collapse; font-size:12px; border:1px solid #d8e2f0; border-radius:6px;">
+                <tr style="background:#e4eefb; color:#14457f;">
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:20%; font-weight:bold;"><apex:outputText value="{!sec.colLabel}"/></td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:11%; text-align:center; font-weight:bold;">Status</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:27%; font-weight:bold;">Comments</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:21%; font-weight:bold;">Next Steps</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:13%; text-align:center; font-weight:bold;">Screenshot</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:8%; text-align:center; font-weight:bold;">Recurring</td>
                 </tr>
                 <apex:repeat value="{!sec.rows}" var="row">
-                    <tr>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top;"><apex:outputText value="{!row.label}"/></td>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center; font-weight:bold; background:{!row.statusColor}; color:{!row.statusTextColor};"><apex:outputText value="{!row.status}"/></td>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top;">
-                            <apex:outputText escape="false" value="{!row.comments}"/>
+                    <tr style="background:#ffffff;">
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top;"><apex:outputText value="{!row.label}"/></td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top; text-align:center;">
+                            <span style="{!row.badgeStyle}"><apex:outputText escape="false" value="{!row.statusIcon}"/>&nbsp;<apex:outputText value="{!row.statusLabel}"/></span>
                         </td>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top;"><apex:outputText escape="false" value="{!row.nextSteps}"/></td>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center;"><apex:outputText escape="false" value="{!row.imageHtml}"/></td>
-                        <td style="padding:6px 8px; border:1px solid #e2e6ee; vertical-align:top; text-align:center;"><apex:outputText value="{!row.recurring}"/></td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top;">
+                            <apex:outputText escape="false" value="{!IF(row.comments == '', '-', row.comments)}"/>
+                        </td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top;"><apex:outputText escape="false" value="{!IF(row.nextSteps == '', '-', row.nextSteps)}"/></td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top; text-align:center;"><apex:outputText escape="false" value="{!IF(row.imageHtml == '', '-', row.imageHtml)}"/></td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top; text-align:center;"><apex:outputText value="{!IF(row.recurring == '', '-', row.recurring)}"/></td>
                     </tr>
                 </apex:repeat>
             </table>
         </apex:repeat>
-
+ 
+        <!-- ── Appendix (only if detail rows exist) ───────────────────── -->
         <apex:outputPanel layout="block" rendered="{!detailGroups.size > 0}">
-            <div style="background:#00B0F0; color:#ffffff; font-size:14px; font-weight:bold; padding:9px 12px; margin-top:20px;">
+            <div style="margin:22px 0 8px; padding-left:10px; border-left:4px solid #1c5fbf;
+                        color:#14457f; font-size:14px; font-weight:bold; text-transform:uppercase;">
                 Detailed Breakdown (Appendix)
             </div>
             <apex:repeat value="{!detailGroups}" var="d">
-                <div style="font-size:12.5px; font-weight:bold; border-left:4px solid #4472C4; padding-left:8px; margin:14px 0 6px;">
+                <div style="font-size:12.5px; font-weight:bold; color:#14457f; border-left:3px solid #1c5fbf; padding-left:8px; margin:14px 0 6px;">
                     <apex:outputText value="{!d.itemLabel}"/>
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:11.5px;">
-                    <tr style="background:#4472C4; color:#ffffff;">
-                        <td style="padding:5px 8px; border:1px solid #cfd6e4;">Item</td>
-                        <td style="padding:5px 8px; border:1px solid #cfd6e4; text-align:right;">Total</td>
-                        <td style="padding:5px 8px; border:1px solid #cfd6e4; text-align:right;">Used</td>
-                        <td style="padding:5px 8px; border:1px solid #cfd6e4; text-align:right;">Remaining</td>
-                        <td style="padding:5px 8px; border:1px solid #cfd6e4; text-align:center;">Status</td>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:11.5px; border:1px solid #d8e2f0;">
+                    <tr style="background:#e4eefb; color:#14457f;">
+                        <td style="padding:6px 10px; border:1px solid #d8e2f0; font-weight:bold;">Item</td>
+                        <td style="padding:6px 10px; border:1px solid #d8e2f0; text-align:right; font-weight:bold;">Total</td>
+                        <td style="padding:6px 10px; border:1px solid #d8e2f0; text-align:right; font-weight:bold;">Used</td>
+                        <td style="padding:6px 10px; border:1px solid #d8e2f0; text-align:right; font-weight:bold;">Remaining</td>
+                        <td style="padding:6px 10px; border:1px solid #d8e2f0; text-align:center; font-weight:bold;">Status</td>
                     </tr>
                     <apex:repeat value="{!d.rows}" var="row">
-                        <tr>
-                            <td style="padding:5px 8px; border:1px solid #e2e6ee;"><apex:outputText value="{!row.label}"/></td>
-                            <td style="padding:5px 8px; border:1px solid #e2e6ee; text-align:right;"><apex:outputText value="{!row.total}"/></td>
-                            <td style="padding:5px 8px; border:1px solid #e2e6ee; text-align:right;"><apex:outputText value="{!row.used}"/></td>
-                            <td style="padding:5px 8px; border:1px solid #e2e6ee; text-align:right;"><apex:outputText value="{!row.remaining}"/></td>
-                            <td style="padding:5px 8px; border:1px solid #e2e6ee; text-align:center; font-weight:bold; background:{!row.statusColor}; color:{!row.statusTextColor};"><apex:outputText value="{!row.status}"/></td>
+                        <tr style="background:#ffffff;">
+                            <td style="padding:6px 10px; border:1px solid #eef2f8;"><apex:outputText value="{!row.label}"/></td>
+                            <td style="padding:6px 10px; border:1px solid #eef2f8; text-align:right;"><apex:outputText value="{!row.total}"/></td>
+                            <td style="padding:6px 10px; border:1px solid #eef2f8; text-align:right;"><apex:outputText value="{!row.used}"/></td>
+                            <td style="padding:6px 10px; border:1px solid #eef2f8; text-align:right;"><apex:outputText value="{!row.remaining}"/></td>
+                            <td style="padding:6px 10px; border:1px solid #eef2f8; text-align:center;">
+                                <span style="{!row.badgeStyle}"><apex:outputText escape="false" value="{!row.statusIcon}"/>&nbsp;<apex:outputText value="{!row.statusLabel}"/></span>
+                            </td>
                         </tr>
                     </apex:repeat>
                 </table>
             </apex:repeat>
         </apex:outputPanel>
-
-        <div style="margin-top:14px; font-size:11px; color:#8a93a0; border-top:1px solid #eef0f3; padding-top:8px;">
-            Auto-generated by the Sales Cloud Daily Health Check.
+ 
+        <!-- ── Note box ───────────────────────────────────────────────── -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="border-collapse:collapse; margin-top:22px; background:#eef4fc; border:1px solid #cfe0f7; border-radius:8px;">
+            <tr>
+                <td style="padding:12px 16px; color:#1f2937; font-size:12px; vertical-align:middle;">
+                    <span style="color:#1c5fbf; font-weight:bold; font-size:14px;">&#9432;</span>
+                    &nbsp;<span style="color:#1c5fbf; font-weight:bold;">Note:</span>
+                    &nbsp;This is an automated report. Please review the comments and next steps for required actions.
+                </td>
+            </tr>
+        </table>
+ 
+        <!-- ── Footer ─────────────────────────────────────────────────── -->
+        <div style="margin-top:14px; text-align:center; font-size:11.5px; color:#1c5fbf; font-weight:bold;">
+            Sales Cloud Daily Health Check | Generated on {!generatedLabel}
         </div>
+ 
     </div>
 </apex:component>

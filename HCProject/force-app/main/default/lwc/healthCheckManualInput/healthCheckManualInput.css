@@ -11,7 +11,7 @@
 .banner-green  { background: #c6efce; color: #375623; border-left: 4px solid #375623; }
 .banner-amber  { background: #ffeb9c; color: #9c5700; border-left: 4px solid #9c5700; }
 .banner-red    { background: #ffc7ce; color: #9c0006; border-left: 4px solid #9c0006; }
-
+ 
 /* ── Section headers ──────────────────────────────────────────────── */
 .section-title-auto {
     background: #dae8f5;
@@ -43,18 +43,18 @@
     margin-bottom: 4px;
     border-radius: 0 4px 4px 0;
 }
-
+ 
 /* ── Table row colours ────────────────────────────────────────────── */
 .hc-table .row-green   td { background: #c6efce !important; }
 .hc-table .row-amber   td { background: #ffeb9c !important; }
 .hc-table .row-red     td { background: #ffc7ce !important; }
 .hc-table .row-pending td { background: #d9d9d9 !important; color: #666; font-style: italic; }
-
+ 
 /* ── Badge colours ────────────────────────────────────────────────── */
 .badge-amber   { background: #ffeb9c !important; color: #9c5700 !important; }
 .badge-red     { background: #ffc7ce !important; color: #9c0006 !important; }
 .badge-pending { background: #d9d9d9 !important; color: #555    !important; }
-
+ 
 /* ── Detail cell ──────────────────────────────────────────────────── */
 .detail-cell {
     font-size: 0.78rem;
@@ -62,20 +62,35 @@
     word-break: break-word;
     max-width: 300px;
 }
-
+ 
+/* ── Inline-editable cells (automated table) ──────────────────────── */
+.auto-edit-cell {
+    vertical-align: top;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+.hc-table .auto-edit-cell lightning-combobox,
+.hc-table .auto-edit-cell lightning-textarea {
+    display: block;
+    width: 100%;
+}
+ 
 /* ── Manual card ──────────────────────────────────────────────────── */
 .manual-card {
     border: 1px solid #d8dde6;
     border-radius: 4px;
     background: #fafafa;
+    padding: 0.5rem 0.75rem 0.75rem;
 }
-.manual-label {
-    font-size: 0.8rem;
+.manual-item-title {
+    font-size: 0.82rem;
     font-weight: 600;
-    display: block;
-    margin-top: 0.5rem;
-    color: #444;
+    color: #1a237e;
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #e2e6ee;
 }
+/* Make every field control fill its column for a clean aligned grid */
 .manual-card lightning-textarea,
 .manual-card lightning-input-rich-text,
 .manual-card lightning-input,
@@ -83,14 +98,14 @@
     display: block;
     width: 100%;
 }
-
+ 
 /* keep the rich-text editor body/toolbar inside the column */
 .manual-card .slds-rich-text-editor,
 .manual-card .slds-rich-text-area__content {
     max-width: 100%;
     box-sizing: border-box;
 }
-
+ 
 /* ── Toast messages ───────────────────────────────────────────────── */
 .toast-success { background: #c6efce; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }
 .toast-error   { background: #ffc7ce; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem; }

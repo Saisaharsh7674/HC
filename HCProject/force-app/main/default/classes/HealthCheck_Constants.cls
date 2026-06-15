@@ -3,7 +3,7 @@
  *              Centralises section names, display ordering, and manual section definitions.
  */
 public with sharing class HealthCheck_Constants {
-
+ 
     // ─── Section names ───────────────────────────────────────────────────────
     public static final String SEC_INTEGRATIONS   = 'Sales Cloud Integrations';
     public static final String SEC_PROCESS        = 'Process';
@@ -23,14 +23,14 @@ public with sharing class HealthCheck_Constants {
     public static final String SEC_CVENT          = 'Cvent Errors';
     public static final String SEC_HYPERFORCE     = 'Hyperforce';
     public static final String SEC_CRMA           = 'CRMA';
-
+ 
     // ─── Status values ────────────────────────────────────────────────────────
     public static final String STATUS_GREEN   = 'Green';
     public static final String STATUS_AMBER   = 'Amber';
     public static final String STATUS_RED     = 'Red';
     public static final String STATUS_NA      = 'N/A';
     public static final String STATUS_PENDING = 'Pending';
-
+ 
     // ─── Manual section placeholders (Section__c → Sub_Section__c → Display Order) ──
     public static final List<ManualSectionDef> MANUAL_SECTIONS = new List<ManualSectionDef>{
         new ManualSectionDef(SEC_INTEGRATIONS,  'Introhive',          1,  1),
@@ -55,7 +55,7 @@ public with sharing class HealthCheck_Constants {
         new ManualSectionDef(SEC_CRMA,          'CRMA Status',             24, 24),
         new ManualSectionDef(SEC_TRUST,         'Salesforce Trust',        25, 25)
     };
-
+ 
     // ─── Automated section display orders ────────────────────────────────────
     //  REFERENCE ONLY — these constants are not read by the engine. The live order
     //  of each automated check is the KPMG_Display_Order__c on its
@@ -65,14 +65,14 @@ public with sharing class HealthCheck_Constants {
     public static final Integer ORD_SCHED_JOBS   = 17;  // Batch/Scheduled Jobs
     public static final Integer ORD_PLATFORM_EVT = 22;  // Platform Events
     public static final Integer ORD_CVENT        = 26;  // Cvent Errors (not in the standard list)
-
+ 
     // ─── Helper inner class ───────────────────────────────────────────────────
     public class ManualSectionDef {
         public String section;
         public String subSection;
         public Integer displayOrder;
         public Integer emailOrder;
-
+ 
         public ManualSectionDef(String sec, String sub, Integer dispOrd, Integer emailOrd) {
             this.section      = sec;
             this.subSection   = sub;
@@ -80,7 +80,7 @@ public with sharing class HealthCheck_Constants {
             this.emailOrder   = emailOrd;
         }
     }
-
+ 
     // ─── RAG evaluation ──────────────────────────────────────────────────────
     public static String ragStatus(Decimal used, Decimal total,
                                    Decimal amberPct, Decimal redPct) {
