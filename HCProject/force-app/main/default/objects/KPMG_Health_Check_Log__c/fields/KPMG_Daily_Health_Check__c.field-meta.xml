@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>KPMG_Daily_Health_Check__c</fullName>
+    <label>Daily Health Check</label>
+    <referenceTo>KPMG_Daily_Health_Check__c</referenceTo>
+    <relationshipLabel>Health Check Logs</relationshipLabel>
+    <relationshipName>Health_Check_Logs</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>
