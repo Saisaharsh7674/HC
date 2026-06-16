@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <logo>Image</logo>
+        <logoVersion>1</logoVersion>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Provides a centralized view to monitor scheduled jobs, track execution status, and ensure daily health checks are completed successfully.</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Health Check</label>
+    <navType>Standard</navType>
+    <tabs>Health_Check_Monitoring_Dashboard</tabs>
+    <tabs>KPMG_Daily_Health_Check__c</tabs>
+    <tabs>KPMG_Health_Check_Log__c</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>Health_Check_UtilityBar</utilityBar>
+</CustomApplication>

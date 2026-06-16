@@ -16,11 +16,13 @@ public with sharing class healthCheckEmailController {
  
     private List<SectionWrap> sections;
     private List<DetailWrap>  detailGroups;
+    private List<ListingWrap> listingSections;
     private KPMG_Daily_Health_Check__c masterRec;
  
     public KPMG_Daily_Health_Check__c getMaster() { build(); return masterRec; }
     public List<SectionWrap> getSections()        { build(); return sections; }
     public List<DetailWrap>  getDetailGroups()    { build(); return detailGroups; }
+    public List<ListingWrap> getListingSections() { build(); return listingSections; }
  
     public String getCheckDate() {
         build();
@@ -48,6 +50,7 @@ public with sharing class healthCheckEmailController {
         if (sections != null) return;
         sections = new List<SectionWrap>();
         detailGroups = new List<DetailWrap>();
+        listingSections = new List<ListingWrap>();
         if (dailyCheckId == null) return;
  
         masterRec = [
@@ -61,8 +64,9 @@ public with sharing class healthCheckEmailController {
             SELECT Id, KPMG_Section__c, KPMG_Sub_Section__c, KPMG_Status__c,
                    KPMG_Total__c, KPMG_Used__c, KPMG_Remaining__c,
                    KPMG_Details__c, KPMG_Comments__c, KPMG_Next_Steps__c,
-                   KPMG_Is_Recurring__c, KPMG_Image__c,
-                   KPMG_Is_Detail__c, KPMG_Parent_Item__c, KPMG_Display_Order__c
+                   KPMG_Jira_Reference__c, KPMG_Is_Recurring__c, KPMG_Image__c,
+                   KPMG_Is_Detail__c, KPMG_Parent_Item__c, KPMG_Display_Order__c,
+                   KPMG_Run_By__c
             FROM KPMG_Health_Check_Log__c
             WHERE KPMG_Daily_Health_Check__c = :dailyCheckId
             ORDER BY KPMG_Display_Order__c NULLS LAST, KPMG_Sub_Section__c
@@ -70,10 +74,24 @@ public with sharing class healthCheckEmailController {
  
         Map<String, SectionWrap> bandMap   = new Map<String, SectionWrap>();
         Map<String, DetailWrap>  detailMap = new Map<String, DetailWrap>();
+        Map<String, ListingWrap> listMap   = new Map<String, ListingWrap>();
         List<String> detailOrder = new List<String>();
+        List<String> listOrder   = new List<String>();
  
         for (KPMG_Health_Check_Log__c l : logs) {
-            if (l.KPMG_Is_Detail__c == true) {
+            if (l.KPMG_Run_By__c == 'Listing') {
+                String band = String.isBlank(l.KPMG_Section__c) ? 'Other' : l.KPMG_Section__c;
+                ListingWrap lw = listMap.get(band);
+                if (lw == null) {
+                    lw = new ListingWrap();
+                    lw.name    = band;
+                    lw.headers = new List<String>();
+                    lw.rows    = new List<ListingRowWrap>();
+                    listMap.put(band, lw);
+                    listOrder.add(band);
+                }
+                lw.add(l);
+            } else if (l.KPMG_Is_Detail__c == true) {
                 String key = String.isBlank(l.KPMG_Parent_Item__c)
                     ? l.KPMG_Sub_Section__c : l.KPMG_Parent_Item__c;
                 DetailWrap dw = detailMap.get(key);
@@ -105,6 +123,7 @@ public with sharing class healthCheckEmailController {
         }
         for (SectionWrap sw : bandMap.values()) sections.add(sw);
         for (String k : detailOrder) detailGroups.add(detailMap.get(k));
+        for (String k : listOrder)   listingSections.add(listMap.get(k));
     }
  
     public class SectionWrap {
@@ -118,15 +137,45 @@ public with sharing class healthCheckEmailController {
         public List<RowWrap> rows { get; set; }
     }
  
+    /** A multi-column listing section (Scheduled Jobs, Service Accounts, …). */
+    public class ListingWrap {
+        public String name { get; set; }
+        public List<String> headers { get; set; }
+        public List<ListingRowWrap> rows { get; set; }
+ 
+        public void add(KPMG_Health_Check_Log__c l) {
+            ListingRowWrap r = new ListingRowWrap();
+            r.statusRow = new RowWrap(l);
+            r.statusText = String.isBlank(l.KPMG_Comments__c)
+                ? r.statusRow.getStatusLabel() : l.KPMG_Comments__c;
+            r.cells = new List<String>();
+            if (String.isNotBlank(l.KPMG_Details__c) && l.KPMG_Details__c.startsWith('[')) {
+                List<Object> cols = (List<Object>) JSON.deserializeUntyped(l.KPMG_Details__c);
+                for (Object o : cols) {
+                    Map<String, Object> c = (Map<String, Object>) o;
+                    if (headers.size() < cols.size()) headers.add(String.valueOf(c.get('h')));
+                    r.cells.add(c.get('v') == null ? '' : String.valueOf(c.get('v')));
+                }
+            }
+            rows.add(r);
+        }
+    }
+    public class ListingRowWrap {
+        public List<String> cells { get; set; }
+        public String statusText { get; set; }
+        public RowWrap statusRow { get; set; }     // exposes badgeStyle / statusIcon
+    }
+ 
     public class RowWrap {
         public KPMG_Health_Check_Log__c log { get; set; }
         public RowWrap(KPMG_Health_Check_Log__c l) { this.log = l; }
  
         public String getLabel()     { return log.KPMG_Sub_Section__c; }
         public String getStatus()    { return log.KPMG_Status__c; }
-        public String getComments()  { return toHtml(log.KPMG_Details__c, log.KPMG_Comments__c); }
-        public String getNextSteps() { return brk(log.KPMG_Next_Steps__c); }
+        public String getComments()  { return log.KPMG_Details__c; }
+        public String getNextSteps() { return brk(log.KPMG_Comments__c); }
         public String getRecurring() { return log.KPMG_Is_Recurring__c == true ? 'Yes' : ''; }
+        public String getJira()      { return log.KPMG_Jira_Reference__c == null ? '' : log.KPMG_Jira_Reference__c; }
         public String getImageHtml() { return log.KPMG_Image__c == null ? '' : log.KPMG_Image__c; }
         public String getTotal()     { return fmt(log.KPMG_Total__c); }
         public String getUsed()      { return fmt(log.KPMG_Used__c); }

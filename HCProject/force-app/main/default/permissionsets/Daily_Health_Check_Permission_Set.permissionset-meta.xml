@@ -4,6 +4,14 @@
         <application>KPMG_Health_Check</application>
         <visible>true</visible>
     </applicationVisibilities>
+    <classAccesses>
+        <apexClass>healthCheckManualInputController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>healthCheckManualInputControllerTest</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <customSettingAccesses>
         <enabled>true</enabled>
         <name>KPMG_Heath_Check_Email_Config__c</name>
@@ -155,6 +163,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>KPMG_Health_Check_Log__c.KPMG_Image__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KPMG_Health_Check_Log__c.KPMG_Is_Detail__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>KPMG_Health_Check_Log__c.KPMG_Is_Manual__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -176,6 +194,16 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>KPMG_Health_Check_Log__c.KPMG_Next_Steps__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>KPMG_Health_Check_Log__c.KPMG_Parent_Item__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>KPMG_Health_Check_Log__c.KPMG_Remaining__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -226,6 +254,10 @@
         <viewAllFields>false</viewAllFields>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <tabSettings>
+        <tab>Health_Check_Monitoring_Dashboard</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
     <tabSettings>
         <tab>KPMG_Daily_Health_Check__c</tab>
         <visibility>Visible</visibility>

@@ -44,8 +44,6 @@
                             alternative-text="Status">
                         </lightning-icon>
                     </span>
-                    <strong>Overall Status: {overallStatusLabel}</strong>
-                    &nbsp;&nbsp;|&nbsp;&nbsp;
                     Check Date: {checkDateLabel}
                     &nbsp;&nbsp;|&nbsp;&nbsp;
                     <template if:true={emailSent}>
@@ -77,7 +75,7 @@
                         Automated Checks ({automatedCount}) — Status &amp; Details are editable
                     </h3>
                     <div class="slds-section__content">
-                        <div class="slds-scrollable_x">
+                        <div class="hc-table-wrap">
                         <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped hc-table">
                             <thead>
                                 <tr class="slds-line-height_reset">
@@ -127,6 +125,51 @@
                         </div>
                     </div>
                 </div>
+ 
+                <!-- ── LISTING SECTIONS (Scheduled Jobs / Service Accounts) ─ -->
+                <template if:true={hasListings}>
+                    <template for:each={listingSections} for:item="ls">
+                        <div key={ls.key} class="slds-section slds-is-open slds-m-top_medium">
+                            <h3 class="slds-section__title section-title-auto">
+                                <lightning-icon icon-name="utility:table" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                {ls.name}
+                            </h3>
+                            <div class="slds-section__content">
+                                <div class="hc-table-wrap">
+                                    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped hc-table">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <template for:each={ls.headerCells} for:item="h">
+                                                    <th key={h.key} scope="col">{h.label}</th>
+                                                </template>
+                                                <th scope="col" class="slds-text-align_center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template for:each={ls.rows} for:item="row">
+                                                <tr key={row.key} class={row.rowClass}>
+                                                    <template for:each={row.cells} for:item="cell">
+                                                        <td key={cell.key}>{cell.value}</td>
+                                                    </template>
+                                                    <td class="auto-edit-cell slds-text-align_center">
+                                                        <lightning-combobox
+                                                            variant="label-hidden"
+                                                            label="Status"
+                                                            value={row.statusValue}
+                                                            options={statusOptions}
+                                                            data-id={row.id}
+                                                            onchange={handleListingStatusChange}>
+                                                        </lightning-combobox>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </template>
  
                 <!-- ── MANUAL SECTIONS ──────────────────────────────────── -->
                 <div class="slds-section slds-is-open slds-m-top_medium">

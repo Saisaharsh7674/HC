@@ -75,6 +75,20 @@
     width: 100%;
 }
  
+/* ── Table wrapper ────────────────────────────────────────────────────
+   Horizontal scroll for wide tables, BUT when any field inside is focused
+   (e.g. a Status combobox is open) we drop the clipping so the dropdown can
+   overlay the rows below instead of being cut off by the scroll container. */
+.hc-table-wrap {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+.hc-table-wrap:focus-within {
+    overflow: visible;
+    position: relative;
+    z-index: 9000;
+}
+ 
 /* ── Manual card ──────────────────────────────────────────────────── */
 .manual-card {
     border: 1px solid #d8dde6;

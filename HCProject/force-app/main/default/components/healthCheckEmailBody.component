@@ -37,11 +37,12 @@
             <table width="100%" cellpadding="0" cellspacing="0"
                    style="border-collapse:collapse; font-size:12px; border:1px solid #d8e2f0; border-radius:6px;">
                 <tr style="background:#e4eefb; color:#14457f;">
-                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:20%; font-weight:bold;"><apex:outputText value="{!sec.colLabel}"/></td>
-                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:11%; text-align:center; font-weight:bold;">Status</td>
-                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:27%; font-weight:bold;">Comments</td>
-                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:21%; font-weight:bold;">Next Steps</td>
-                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:13%; text-align:center; font-weight:bold;">Screenshot</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:18%; font-weight:bold;"><apex:outputText value="{!sec.colLabel}"/></td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:10%; text-align:center; font-weight:bold;">Status</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:22%; font-weight:bold;">Comments</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:18%; font-weight:bold;">Next Steps</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:12%; font-weight:bold;">Jira / Ticket</td>
+                    <td style="padding:8px 10px; border:1px solid #d8e2f0; width:12%; text-align:center; font-weight:bold;">Screenshot</td>
                     <td style="padding:8px 10px; border:1px solid #d8e2f0; width:8%; text-align:center; font-weight:bold;">Recurring</td>
                 </tr>
                 <apex:repeat value="{!sec.rows}" var="row">
@@ -54,6 +55,7 @@
                             <apex:outputText escape="false" value="{!IF(row.comments == '', '-', row.comments)}"/>
                         </td>
                         <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top;"><apex:outputText escape="false" value="{!IF(row.nextSteps == '', '-', row.nextSteps)}"/></td>
+                        <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top;"><apex:outputText value="{!IF(row.jira == '', '-', row.jira)}"/></td>
                         <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top; text-align:center;"><apex:outputText escape="false" value="{!IF(row.imageHtml == '', '-', row.imageHtml)}"/></td>
                         <td style="padding:8px 10px; border:1px solid #eef2f8; vertical-align:top; text-align:center;"><apex:outputText value="{!IF(row.recurring == '', '-', row.recurring)}"/></td>
                     </tr>
@@ -61,7 +63,32 @@
             </table>
         </apex:repeat>
  
-        <!-- ── Appendix (only if detail rows exist) ───────────────────── -->
+        <!-- ── Listing sections (Scheduled Jobs / Service Accounts) ───── -->
+        <apex:repeat value="{!listingSections}" var="ls">
+            <div style="margin:18px 0 8px; padding-left:10px; border-left:4px solid #1c5fbf;
+                        color:#14457f; font-size:14px; font-weight:bold; text-transform:uppercase; letter-spacing:0.4px;">
+                <apex:outputText value="{!ls.name}"/>
+            </div>
+            <table width="100%" cellpadding="0" cellspacing="0"
+                   style="border-collapse:collapse; font-size:11.5px; border:1px solid #d8e2f0;">
+                <tr style="background:#e4eefb; color:#14457f;">
+                    <apex:repeat value="{!ls.headers}" var="h">
+                        <td style="padding:7px 9px; border:1px solid #d8e2f0; font-weight:bold;"><apex:outputText value="{!h}"/></td>
+                    </apex:repeat>
+                    <td style="padding:7px 9px; border:1px solid #d8e2f0; text-align:center; font-weight:bold;">Status</td>
+                </tr>
+                <apex:repeat value="{!ls.rows}" var="lr">
+                    <tr style="background:#ffffff;">
+                        <apex:repeat value="{!lr.cells}" var="cell">
+                            <td style="padding:7px 9px; border:1px solid #eef2f8; vertical-align:top;"><apex:outputText value="{!IF(cell == '', '-', cell)}"/></td>
+                        </apex:repeat>
+                        <td style="padding:7px 9px; border:1px solid #eef2f8; vertical-align:top; text-align:center;">
+                            <span style="{!lr.statusRow.badgeStyle}"><apex:outputText escape="false" value="{!lr.statusRow.statusIcon}"/>&nbsp;<apex:outputText value="{!lr.statusText}"/></span>
+                        </td>
+                    </tr>
+                </apex:repeat>
+            </table>
+        </apex:repeat>
         <apex:outputPanel layout="block" rendered="{!detailGroups.size > 0}">
             <div style="margin:22px 0 8px; padding-left:10px; border-left:4px solid #1c5fbf;
                         color:#14457f; font-size:14px; font-weight:bold; text-transform:uppercase;">

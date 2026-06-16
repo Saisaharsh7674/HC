@@ -23,6 +23,9 @@ public with sharing class HealthCheck_Constants {
     public static final String SEC_CVENT          = 'Cvent Errors';
     public static final String SEC_HYPERFORCE     = 'Hyperforce';
     public static final String SEC_CRMA           = 'CRMA';
+    public static final String SEC_MULEDIGEST     = 'Mulesoft Daily Digest Errors';
+    public static final String SEC_SFNEWSLETTER   = 'Salesforce Newsletter';
+    public static final String SEC_CERTUPDATES    = 'Certificate Updates';
  
     // ─── Status values ────────────────────────────────────────────────────────
     public static final String STATUS_GREEN   = 'Green';
@@ -53,7 +56,10 @@ public with sharing class HealthCheck_Constants {
         new ManualSectionDef(SEC_OM_DASHBOARD,  'Daily Field Tracker (Low Priority)',  21, 21),
         new ManualSectionDef(SEC_WORKBENCH,     'WorkBench Observations',  23, 23),
         new ManualSectionDef(SEC_CRMA,          'CRMA Status',             24, 24),
-        new ManualSectionDef(SEC_TRUST,         'Salesforce Trust',        25, 25)
+        new ManualSectionDef(SEC_TRUST,         'Salesforce Trust',        25, 25),
+        new ManualSectionDef(SEC_MULEDIGEST,    'Mulesoft Daily Digest Errors',  26, 26),
+        new ManualSectionDef(SEC_SFNEWSLETTER,  'Salesforce Newsletter',        27, 27),
+        new ManualSectionDef(SEC_CERTUPDATES,   'Certificate Updates',        28, 28)
     };
  
     // ─── Automated section display orders ────────────────────────────────────

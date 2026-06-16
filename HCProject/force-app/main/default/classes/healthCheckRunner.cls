@@ -99,6 +99,8 @@ public with sharing class healthCheckRunner
  
             if (strategy == 'LIMITS_API') {
                 logs.addAll(handleLimitsApi(cfg, masterId));
+            } else if (strategy == 'LISTING') {
+                logs.addAll(handleListing(cfg, masterId));
             } else if (isCount(cfg) || strategy == 'COUNT') {
                 logs.add(handleCount(cfg, masterId));
             } else if (strategy == 'FAILURES') {
@@ -204,6 +206,131 @@ public with sharing class healthCheckRunner
                 null, null, String.join(parts, ' | ')));
         }
         return out;
+    }
+ 
+    /**
+     * LISTING — renders an arbitrary multi-column table (e.g. Scheduled Jobs,
+     * Service Accounts). One log row per record.
+     *   KPMG_Detail_Fields__c : ordered "Header:FieldPath" pairs (comma-separated)
+     *   KPMG_Label_Field__c   : field used for the row's Sub_Section identity
+     * The selected column values are stored as a JSON array of {h,v} in
+     * KPMG_Details__c; the renderers (LWC + email) turn that into table columns.
+     * Marked with KPMG_Run_By__c = 'Listing' so the UI groups them separately.
+     * Status: derived per object (User = login recency, CronTrigger = State).
+     */
+    private static List<KPMG_Health_Check_Log__c> handleListing(
+            KPMG_Daily_Health_Check__c cfg, Id masterId) {
+        List<KPMG_Health_Check_Log__c> out = new List<KPMG_Health_Check_Log__c>();
+        List<SObject> rows = runQuery(cfg);
+ 
+        if (rows.isEmpty()) {
+            out.add(listingLog(cfg, masterId,
+                strOr(cfg.KPMG_Sub_Section_Label__c, 'No records'),
+                HealthCheck_Constants.STATUS_GREEN, 'None',
+                strOr(cfg.KPMG_Empty_Message__c, 'No records found.'), '[]'));
+            return out;
+        }
+ 
+        // Parse the "Header:FieldPath" column spec once.
+        List<String> headers = new List<String>();
+        List<String> paths   = new List<String>();
+        for (String pair : splitCsv(cfg.KPMG_Detail_Fields__c)) {
+            String header, path;
+            if (pair.contains(':')) {
+                header = pair.substringBefore(':').trim();
+                path   = pair.substringAfter(':').trim();
+            } else {
+                path   = pair.trim();
+                header = path.contains('.') ? path.substringAfterLast('.') : path;
+            }
+            headers.add(header);
+            paths.add(path);
+        }
+        String labelF = strOr(cfg.KPMG_Label_Field__c, paths.isEmpty() ? 'Id' : paths[0]);
+ 
+        for (SObject row : rows) {
+            List<Map<String, String>> cols = new List<Map<String, String>>();
+            for (Integer i = 0; i < paths.size(); i++) {
+                cols.add(new Map<String, String>{
+                    'h' => headers[i],
+                    'v' => formatCell(getFieldValue(row, paths[i]))
+                });
+            }
+            Object lbl = getFieldValue(row, labelF);
+            String sub = lbl == null ? '—' : String.valueOf(lbl);
+ 
+            String statusText;
+            String rag = deriveListingStatus(cfg, row);
+            statusText = listingStatusText(cfg, row, rag);
+ 
+            out.add(listingLog(cfg, masterId, sub, rag, statusText,
+                null, JSON.serialize(cols)));
+        }
+        return out;
+    }
+ 
+    /** Per-object RAG derivation for LISTING rows. */
+    private static String deriveListingStatus(KPMG_Daily_Health_Check__c cfg, SObject row) {
+        String obj = cfg.KPMG_SObject_API_Name__c == null
+            ? '' : cfg.KPMG_SObject_API_Name__c.trim().toLowerCase();
+ 
+        if (obj == 'user') {
+            Object ll = getFieldValue(row, 'LastLoginDate');
+            if (ll == null) return HealthCheck_Constants.STATUS_AMBER;
+            Integer staleDays = intOr(cfg.KPMG_Amber_Threshold__c, 90);
+            Datetime last = (Datetime) ll;
+            return last < System.now().addDays(-staleDays)
+                ? HealthCheck_Constants.STATUS_AMBER
+                : HealthCheck_Constants.STATUS_GREEN;
+        }
+        if (obj == 'crontrigger') {
+            Object st = getFieldValue(row, 'State');
+            String state = st == null ? '' : String.valueOf(st).toUpperCase();
+            if (state == 'ERROR')  return HealthCheck_Constants.STATUS_RED;
+            if (state == 'PAUSED' || state == 'DELETED') return HealthCheck_Constants.STATUS_AMBER;
+            return HealthCheck_Constants.STATUS_GREEN;
+        }
+        return HealthCheck_Constants.STATUS_GREEN;
+    }
+ 
+    /** Friendly status word shown on the listing pill (matches the source sheet). */
+    private static String listingStatusText(KPMG_Daily_Health_Check__c cfg, SObject row, String rag) {
+        String obj = cfg.KPMG_SObject_API_Name__c == null
+            ? '' : cfg.KPMG_SObject_API_Name__c.trim().toLowerCase();
+        if (obj == 'user') {
+            return rag == HealthCheck_Constants.STATUS_GREEN ? 'Good' : 'Not Used';
+        }
+        if (obj == 'crontrigger') {
+            Object st = getFieldValue(row, 'State');
+            String state = st == null ? '' : String.valueOf(st);
+            if (rag == HealthCheck_Constants.STATUS_GREEN) return 'Good';
+            return state == '' ? 'Check' : state;
+        }
+        return rag == HealthCheck_Constants.STATUS_GREEN ? 'Good' : 'Review';
+    }
+ 
+    private static String formatCell(Object v) {
+        if (v == null) return '';
+        if (v instanceof Datetime) return ((Datetime) v).format('M/d/yyyy, h:mm a');
+        if (v instanceof Date)     return ((Date) v).format();
+        return String.valueOf(v);
+    }
+ 
+    private static KPMG_Health_Check_Log__c listingLog(KPMG_Daily_Health_Check__c cfg, Id masterId,
+            String sub, String rag, String statusText, String empty, String colsJson) {
+        return new KPMG_Health_Check_Log__c(
+            KPMG_Daily_Health_Check__c = masterId,
+            KPMG_Section__c            = cfg.KPMG_Section__c,
+            KPMG_Sub_Section__c        = sub,
+            KPMG_Status__c             = rag,
+            KPMG_Details__c            = empty == null ? colsJson : empty,
+            KPMG_Comments__c           = statusText,   // display word for the pill
+            KPMG_Is_Manual__c          = false,
+            KPMG_Is_Pending__c         = false,
+            KPMG_Display_Order__c      = cfg.KPMG_Display_Order__c != null
+                                        ? cfg.KPMG_Display_Order__c.intValue() : 0,
+            KPMG_Run_By__c             = 'Listing'
+        );
     }
  
     private static List<KPMG_Health_Check_Log__c> handleApex(

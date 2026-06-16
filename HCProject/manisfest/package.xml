@@ -7,6 +7,10 @@
     <types>
         <members>healthCheckManualInputController</members>
         <members>healthCheckRunner</members>
+        <members>healthCheckEmailComposerTest</members>
+        <members>healthCheckEmailControllerTest</members>
+         <members>healthCheckManualInputControllerTest</members>
+        <members>healthCheckMasterRunnerTest</members>
         <members>healthCheckMasterJob</members>
         <members>HealthCheck_Constants</members>
         <members>healthCheckEmailComposer</members>
@@ -23,10 +27,19 @@
        <members>KPMG_Health_Check_Email_Config__c</members>
        <name>CustomObject</name>
    </types>
- 
    <types>
        <members>Daily_Health_Check_Permission_Set</members>
        <name>PermissionSet</name>
+   </types>
+   <types>
+        <members>KPMG_Health_Check</members>
+        <name>CustomApplication</name>
+   </types>
+   <types>
+        <members>Health_Check_Monitoring_Dashboard</members>
+        <members>KPMG_Daily_Health_Check__c</members>
+        <members>KPMG_Health_Check_Log__c</members>
+        <name>CustomTab</name>
    </types>
     
     <version>66.0</version>

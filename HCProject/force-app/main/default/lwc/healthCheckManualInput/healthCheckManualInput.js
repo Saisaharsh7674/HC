@@ -3,6 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getTodayCheck from '@salesforce/apex/healthCheckManualInputController.getTodayCheck';
 import saveManualLogs from '@salesforce/apex/healthCheckManualInputController.saveManualLogs';
 import saveAutomatedLogs from '@salesforce/apex/healthCheckManualInputController.saveAutomatedLogs';
+import saveListingStatuses from '@salesforce/apex/healthCheckManualInputController.saveListingStatuses';
 import sendEmail from '@salesforce/apex/healthCheckManualInputController.sendEmail';
 import runAutomatedChecks from '@salesforce/apex/healthCheckManualInputController.runAutomatedChecks';
 const STATUS_OPTIONS = [
@@ -39,11 +40,14 @@ export default class HealthCheckManualInput extends LightningElement {
     @track master        = {};
     @track automatedLogs = [];
     @track manualLogs    = [];
+    @track listingSections = [];
  
     // Track unsaved manual changes: map of Id → mutated Health_Check_Log__c
     @track dirtyMap = {};
     // Track unsaved automated overrides (Status / Details)
     @track automatedDirtyMap = {};
+    // Track unsaved listing status overrides: id -> {Id, KPMG_Status__c}
+    @track listingDirtyMap = {};
  
     // ─────────────────────────────────────────────────────────────────────────
  
@@ -60,8 +64,10 @@ export default class HealthCheckManualInput extends LightningElement {
                 this.master   = result.master;
                 this.automatedLogs = this.enrichAutomated(result.automatedLogs || []);
                 this.manualLogs    = this.enrichManual(result.manualLogs    || []);
+                this.listingSections = this.enrichListings(result.listingSections || []);
                 this.dirtyMap          = {};
                 this.automatedDirtyMap = {};
+                this.listingDirtyMap   = {};
                 this.isLoading     = false;
             })
             .catch(err => {
@@ -78,27 +84,6 @@ export default class HealthCheckManualInput extends LightningElement {
  
     get emailSent() {
         return this.master?.KPMG_Email_Sent__c === true;
-    }
- 
-    get overallStatusLabel() {
-        const all = [...this.automatedLogs, ...this.manualLogs];
-        if (all.some(l => l.KPMG_Status__c === 'Red'))   return 'Red — Action Required';
-        if (all.some(l => l.KPMG_Status__c === 'Amber')) return 'Amber — Attention Needed';
-        return 'Green — All Clear';
-    }
- 
-    get overallIcon() {
-        const lbl = this.overallStatusLabel;
-        if (lbl.includes('Red'))   return 'utility:error';
-        if (lbl.includes('Amber')) return 'utility:warning';
-        return 'utility:success';
-    }
- 
-    get overallBannerClass() {
-        const lbl = this.overallStatusLabel;
-        if (lbl.includes('Red'))   return 'overall-banner banner-red';
-        if (lbl.includes('Amber')) return 'overall-banner banner-amber';
-        return 'overall-banner banner-green';
     }
  
     get automatedCount() { return this.automatedLogs.length; }
@@ -154,10 +139,26 @@ export default class HealthCheckManualInput extends LightningElement {
         this.updateDirtyAutomated(id, field, value);
     }
  
+    handleListingStatusChange(event) {
+        const id    = event.target.dataset.id;
+        const value = event.target.value;
+        this.listingDirtyMap[id] = { Id: id, KPMG_Status__c: value };
+        this.listingSections = this.listingSections.map(s => ({
+            ...s,
+            rows: s.rows.map(r => r.id === id ? {
+                ...r,
+                status: value,
+                statusValue: value,
+                rowClass: STATUS_ROW_MAP[value] || ''
+            } : r)
+        }));
+    }
+ 
     handleSave() {
         const manualDirty = Object.values(this.dirtyMap);
         const autoDirty   = Object.values(this.automatedDirtyMap);
-        if (manualDirty.length === 0 && autoDirty.length === 0) {
+        const listDirty   = Object.values(this.listingDirtyMap);
+        if (manualDirty.length === 0 && autoDirty.length === 0 && listDirty.length === 0) {
             this.showInfo('No changes to save.');
             return;
         }
@@ -165,6 +166,7 @@ export default class HealthCheckManualInput extends LightningElement {
         const ops = [];
         if (manualDirty.length) ops.push(saveManualLogs({ logs: manualDirty }));
         if (autoDirty.length)   ops.push(saveAutomatedLogs({ logs: autoDirty }));
+        if (listDirty.length)   ops.push(saveListingStatuses({ logs: listDirty }));
         Promise.all(ops)
             .then(() => {
                 this.showSuccess('Changes saved.');
@@ -185,12 +187,13 @@ export default class HealthCheckManualInput extends LightningElement {
         this.isLoading = true;
         const manualDirty = Object.values(this.dirtyMap);
         const autoDirty   = Object.values(this.automatedDirtyMap);
-        // Persist any automated overrides first (kept as automated rows),
+        const listDirty   = Object.values(this.listingDirtyMap);
+        // Persist automated + listing overrides first (kept as non-manual rows),
         // then send — sendEmail saves the manual edits server-side.
-        const preSave = autoDirty.length
-            ? saveAutomatedLogs({ logs: autoDirty })
-            : Promise.resolve();
-        preSave
+        const preSave = [];
+        if (autoDirty.length) preSave.push(saveAutomatedLogs({ logs: autoDirty }));
+        if (listDirty.length) preSave.push(saveListingStatuses({ logs: listDirty }));
+        Promise.all(preSave)
             .then(() => sendEmail({ dailyCheckId: this.master.Id, pendingLogs: manualDirty }))
             .then(() => {
                 this.showSuccess('Health Check email sent successfully! ✉️');
@@ -274,6 +277,27 @@ export default class HealthCheckManualInput extends LightningElement {
             rowClass:   STATUS_ROW_MAP[l.KPMG_Status__c]   || ''
         }));
     }
+ 
+    // Shape server listing sections for the template (iteration needs keys)
+    enrichListings(sections) {
+        return sections.map((s, si) => ({
+            name: s.name,
+            key: `sec-${si}`,
+            headerCells: (s.headers || []).map((h, hi) => ({ key: `h-${si}-${hi}`, label: h })),
+            rows: (s.rows || []).map((r, ri) => ({
+                key: r.id || `r-${si}-${ri}`,
+                id: r.id,
+                status: r.status,
+                statusValue: r.status,
+                statusText: r.statusText,
+                badgeClass: STATUS_BADGE_MAP[r.status] || 'slds-badge',
+                rowClass:   STATUS_ROW_MAP[r.status]   || '',
+                cells: (r.cells || []).map((c, ci) => ({ key: `c-${si}-${ri}-${ci}`, value: c }))
+            }))
+        }));
+    }
+ 
+    get hasListings() { return this.listingSections && this.listingSections.length > 0; }
  
     showSuccess(msg) {
         this.dispatchEvent(new ShowToastEvent({ title: 'Success', message: msg, variant: 'success' }));
